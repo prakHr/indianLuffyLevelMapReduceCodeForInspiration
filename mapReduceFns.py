@@ -46,17 +46,19 @@ from functools import reduce
 
 
 def get_n_largest(seq, n):
-    return reduce(lambda acc, x: sorted(acc + [x], reverse=True)[:n], seq, [])
+    return sorted(seq, reverse=True)[:n]
+    # return reduce(lambda acc, x: sorted(acc + [x], reverse=True)[:n], seq, [])
 
 
 def get_n_smallest(seq, n):
-    return reduce(lambda acc, x: sorted(acc + [x])[:n], seq, [])
+    return sorted(seq, reverse=False)[:n]
+    # return reduce(lambda acc, x: sorted(acc + [x])[:n], seq, [])
 
 
-# nums = [12, 3, 45, 7, 89, 23, 56, 1, 90, 34]
-# n = 5
-# print("Five largest:", *get_n_largest(nums, n))
-# print("Five smallest:", *get_n_smallest(nums, n))
+# nums = [1, 12]
+# n = 1
+# print("N largest:", *get_n_largest(nums, n))
+# print("N smallest:", *get_n_smallest(nums, n))
 
 
 def group_words(words):
