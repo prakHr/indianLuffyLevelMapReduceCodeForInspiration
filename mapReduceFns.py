@@ -1,33 +1,44 @@
 '''
 from functools import reduce
+from heapq import heappush, heappushpop
 import random
 
-INF = pow(10, 32)
+
+def top_k(xs, k):
+    def reducer(heap, x):
+        if len(heap) < k:
+            heappush(heap, x)
+        else:
+            heappushpop(heap, x)
+
+        return heap
+
+    return sorted(reduce(reducer, xs, []), reverse=True)
 
 
-def my_max(acc, nxt):
-    return max(acc, [nxt])
+# xs = {random.randint(1, 1000000000) for _ in range(1000000)}
+
+# print(top_k(xs, 500))
 
 
-top_n = 2
-xs = [10, 5, 1, 19, 11, 203]
-# xs = [random.randint(1, 1000000000) for i in range(1000000)]
+def smallest_k(xs, k):
+    def reducer(heap, x):
+        x = -x
+
+        if len(heap) < k:
+            heappush(heap, x)
+        else:
+            heappushpop(heap, x)
+
+        return heap
+
+    return sorted([-x for x in reduce(reducer, xs, [])])
 
 
-final_ans = []
-for i in range(top_n):
-    ans = reduce(my_max, xs, [-INF])
-    val = ans[0]
-    if top_n >= 20:
-        print(val)
-    xs[xs.index(val)] = -INF
-    final_ans.append(val)
-print(*final_ans)
+# xs = {random.randint(1, 1000000000) for _ in range(1000000)}
 
-# from functools import reduce
+# print(smallest_k(xs, 500))
 
-# xs = [10, 5, 1, 19, 11, 203]
-# print(reduce(lambda acc, nxt: acc+nxt, xs, 0))
 '''
 '''
 from functools import reduce
