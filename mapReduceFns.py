@@ -20,7 +20,7 @@ for i in range(top_n):
     val = ans[0]
     if top_n >= 20:
         print(val)
-    del xs[xs.index(val)]
+    xs[xs.index(val)] = -INF
     final_ans.append(val)
 print(*final_ans)
 
