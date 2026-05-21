@@ -1,5 +1,36 @@
 '''
 from functools import reduce
+import random
+
+INF = pow(10, 32)
+
+
+def my_max(acc, nxt):
+    return max(acc, [nxt])
+
+
+top_n = 2
+xs = [10, 5, 1, 19, 11, 203]
+# xs = [random.randint(1, 1000000000) for i in range(1000000)]
+
+
+final_ans = []
+for i in range(top_n):
+    ans = reduce(my_max, xs, [-INF])
+    val = ans[0]
+    if top_n >= 20:
+        print(val)
+    del xs[xs.index(val)]
+    final_ans.append(val)
+print(*final_ans)
+
+# from functools import reduce
+
+# xs = [10, 5, 1, 19, 11, 203]
+# print(reduce(lambda acc, nxt: acc+nxt, xs, 0))
+'''
+'''
+from functools import reduce
 
 def combine_counts(left, right):
     unique_keys = set(left.keys()).union(set(right.keys()))
