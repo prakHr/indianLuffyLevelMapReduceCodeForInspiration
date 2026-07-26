@@ -1,6 +1,7 @@
 import numpy as np
 from pargraph import graph, delayed
 
+
 @delayed
 def filter_array(array: np.ndarray, low: float, high: float) -> np.ndarray:
     return array[(array >= low) & (array <= high)]
@@ -37,6 +38,13 @@ def optimized_scalable_topk_elements_getter(np_array, partition_count, top_k):
     np_array_sorted = (map_reduce_sort(np_array, partition_count)*len(np_array))[:top_k]
     return {"top_k_elements":np_array_sorted,"top_k":len(np_array_sorted)}
 
+def optimized_scalable_bottomk_elements_getter(np_array, partition_count, bottom_k):
+    np_array = np_array/len(np_array)
+    np_array_sorted = ((map_reduce_sort(np_array, partition_count)*len(np_array))[::-1])[:bottom_k]
+    return {"bottom_k_elements":np_array_sorted,"bottom_k":len(np_array_sorted)}
+
+    
+
     
 
 if __name__=="__main__":
@@ -50,4 +58,8 @@ if __name__=="__main__":
 
     top_k = 100
     array_data_dict = optimized_scalable_topk_elements_getter(np_array, partition_count, top_k)
+    pprint(array_data_dict)
+
+    bottom_k = 100
+    array_data_dict = optimized_scalable_bottomk_elements_getter(np_array, partition_count, bottom_k)
     pprint(array_data_dict)
