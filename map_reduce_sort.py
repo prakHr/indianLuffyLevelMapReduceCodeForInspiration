@@ -1,7 +1,6 @@
 import numpy as np
 from pargraph import graph, delayed
 
-
 @delayed
 def filter_array(array: np.ndarray, low: float, high: float) -> np.ndarray:
     return array[(array >= low) & (array <= high)]
