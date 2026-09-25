@@ -29,19 +29,19 @@ def map_reduce_sort(array: np.ndarray, partition_count: int) -> np.ndarray:
 
 
 def optimized_scalable_sort(np_array, partition_count):
-    INF = pow(10,31)
+    INF = 0
     np_array = (np_array+INF)/len(np_array)
     np_array_sorted = ((map_reduce_sort(np_array, partition_count)*len(np_array))[:top_k]-INF)
     return {"np_array_sorted":np_array_sorted,"np_array_size":len(np_array)}
 
 def optimized_scalable_topk_elements_getter(np_array, partition_count, top_k):
-    INF = pow(10,31)
+    INF = 0
     np_array = (np_array+INF)/len(np_array)
     np_array_sorted = ((map_reduce_sort(np_array, partition_count)*len(np_array))[:top_k]-INF)
     return {"top_k_elements":np_array_sorted,"top_k":len(np_array_sorted)}
 
 def optimized_scalable_bottomk_elements_getter(np_array, partition_count, bottom_k):
-    INF = pow(10,31)
+    INF = 0
     np_array = (np_array+INF)/len(np_array)
     np_array_sorted = ((map_reduce_sort(np_array, partition_count)*len(np_array))[:top_k]-INF)
     return {"bottom_k_elements":np_array_sorted,"bottom_k":len(np_array_sorted)}
