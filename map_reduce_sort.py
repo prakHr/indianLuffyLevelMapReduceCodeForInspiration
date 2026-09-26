@@ -40,18 +40,25 @@ def scalable_sort(np_array):
     np_array_sorted = np.array(list(np_array_sorted1) + list(np_array_sorted2))
     return np_array_sorted
 
+def get_top_k_elements(np_array_sorted):
+    return np_array_sorted[::-1][:top_k]
+
+def get_bottom_k_elements(np_array_sorted):
+    return np_array_sorted[:bottom_k]
+
+
 def optimized_scalable_sort(np_array, partition_count):
     np_array_sorted = scalable_sort(np_array)
     return {"np_array_sorted":np_array_sorted,"np_array_size":len(np_array)}
 
 def optimized_scalable_topk_elements_getter(np_array, partition_count, top_k):
     np_array_sorted = scalable_sort(np_array)
-    np_array_sorted = np_array_sorted[::-1][:top_k]
+    np_array_sorted = get_top_k_elements(np_array_sorted)
     return {"top_k_elements":np_array_sorted,"top_k":len(np_array_sorted)}
 
 def optimized_scalable_bottomk_elements_getter(np_array, partition_count, bottom_k):
     np_array_sorted = scalable_sort(np_array)
-    np_array_sorted = np_array_sorted[:bottom_k]
+    np_array_sorted = get_bottom_k_elements(np_array_sorted)
     return {"bottom_k_elements":np_array_sorted,"bottom_k":len(np_array_sorted)}
 
     
