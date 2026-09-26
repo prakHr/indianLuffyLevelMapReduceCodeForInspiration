@@ -74,7 +74,7 @@ def optimized_scalable_bottomk_elements_getter(np_array, partition_count, bottom
     
 
 if __name__=="__main__":
-    N = int(pow(10,4))
+    N = int(pow(10,8))
     partition_count = 4
     arr = [i for i in range(N)]
     arr += [-1*i for i in range(N)]
