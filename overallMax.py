@@ -22,6 +22,7 @@ def get_list(acc, nxt):
 
 def my_max(acc, nxt):
     return max(acc, nxt)
+    
 INF = pow(10,32)
 def get_overall_max(list_of_lists):
     ans = -1*INF
