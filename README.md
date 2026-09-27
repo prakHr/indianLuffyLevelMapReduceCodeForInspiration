@@ -12,6 +12,6 @@ proud to be SuperIndian....
 3. Words Grouped Via Length
 4. Overall Max/Min
 5. Overall Sum over List of Lists
-6. Top K/Bottom K without using Priority Q
+6. Top K/Bottom K without using Priority Q (works for entire size of an array)
 7. Wiki Graph over intermediate neighbours
 
