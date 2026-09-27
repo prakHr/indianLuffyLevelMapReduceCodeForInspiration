@@ -3,8 +3,22 @@ from pargraph import graph, delayed
 
 
 @delayed
-def filter_array(array: np.ndarray, low: float, high: float) -> np.ndarray:
-    return array[(array >= low) & (array <= high)]
+def filter_array(
+    array: np.ndarray,
+    low: float,
+    high: float,
+    include_low: bool = True,
+    include_high: bool = False,
+) -> np.ndarray:
+
+    if include_low and include_high:
+        mask = (array >= low) & (array <= high)
+    elif include_low:
+        mask = (array >= low) & (array < high)
+    else:
+        mask = (array > low) & (array <= high)
+
+    return array[mask]
 
 
 @delayed
@@ -14,71 +28,208 @@ def sort_array(array: np.ndarray) -> np.ndarray:
 
 @delayed
 def reduce_arrays(*arrays: np.ndarray) -> np.ndarray:
+    if not arrays:
+        return np.array([], dtype=float)
+
     return np.concatenate(arrays)
 
 
 @graph
-def map_reduce_sort(array: np.ndarray, partition_count: int) -> np.ndarray:
-    return reduce_arrays(
-        *(
-            sort_array(filter_array(array, i / partition_count, (i +
-1) / partition_count))
-            for i in range(partition_count)
-        )
+def map_reduce_sort(
+    array: np.ndarray,
+    partition_count: int,
+) -> np.ndarray:
+
+    if len(array) == 0:
+        return np.array([])
+
+    minimum = np.min(array)
+    maximum = np.max(array)
+
+    if minimum == maximum:
+        return array
+
+    boundaries = np.linspace(
+        minimum,
+        maximum,
+        partition_count + 1,
     )
 
-def scalable_sort(np_array):
-    ZERO = 0
-    NEG = -1
-    np_array1 = np.array([ele for ele in arr if ele < ZERO])*(NEG)
-    np_array2 = np.array([ele for ele in arr if ele >= ZERO])
-    np_array1 = (np_array1)/len(np_array1)
-    np_array_sorted1 = ((map_reduce_sort(np_array1, partition_count)*len(np_array1)))
-    np_array_sorted1 = (np_array_sorted1*NEG)[::-1]
-    np_array2 = (np_array2)/len(np_array2)
-    np_array_sorted2 = ((map_reduce_sort(np_array2, partition_count)*len(np_array2)))
-    np_array_sorted = np.array(list(np_array_sorted1) + list(np_array_sorted2))
-    return np_array_sorted
+    partitions = []
 
-def get_top_k_elements(np_array_sorted):
+    for i in range(partition_count):
+        low = boundaries[i]
+        high = boundaries[i + 1]
+
+        # Last partition includes its upper boundary.
+        if i == partition_count - 1:
+            filtered = filter_array(
+                array,
+                low,
+                high,
+                True,
+                True,
+            )
+        else:
+            filtered = filter_array(
+                array,
+                low,
+                high,
+                True,
+                False,
+            )
+
+        partitions.append(
+            sort_array(filtered)
+        )
+
+    return reduce_arrays(*partitions)
+
+
+def scalable_sort(arr, partition_count=4):
+
+    arr = np.asarray(arr)
+
+    negative = arr[arr < 0]
+    positive = arr[arr >= 0]
+
+    # Sort absolute values of negative numbers.
+    if len(negative):
+        negative_abs = np.abs(negative)
+
+        sorted_negative_abs = map_reduce_sort(
+            negative_abs,
+            partition_count,
+        )
+
+        # Restore negative sign and reverse.
+        sorted_negative = (
+            sorted_negative_abs * -1
+        )[::-1]
+
+    else:
+        sorted_negative = np.array([], dtype=arr.dtype)
+
+    # Sort non-negative numbers.
+    if len(positive):
+        sorted_positive = map_reduce_sort(
+            positive,
+            partition_count,
+        )
+
+    else:
+        sorted_positive = np.array([], dtype=arr.dtype)
+
+    return np.concatenate(
+        [
+            sorted_negative,
+            sorted_positive,
+        ]
+    )
+
+
+def get_top_k_elements(
+    np_array_sorted,
+    top_k,
+):
     return np_array_sorted[::-1][:top_k]
 
-def get_bottom_k_elements(np_array_sorted):
+
+def get_bottom_k_elements(
+    np_array_sorted,
+    bottom_k,
+):
     return np_array_sorted[:bottom_k]
 
 
-def optimized_scalable_sort(np_array, partition_count):
-    np_array_sorted = scalable_sort(np_array)
-    return {"np_array_sorted":np_array_sorted,"np_array_size":len(np_array)}
+def optimized_scalable_sort(
+    np_array,
+    partition_count,
+):
+    np_array_sorted = scalable_sort(
+        np_array,
+        partition_count,
+    )
 
-def optimized_scalable_topk_elements_getter(np_array, partition_count, top_k):
-    np_array_sorted = scalable_sort(np_array)
-    np_array_sorted = get_top_k_elements(np_array_sorted)
-    return {"top_k_elements":np_array_sorted,"top_k":len(np_array_sorted)}
+    return {
+        "np_array_sorted": np_array_sorted,
+        "np_array_size": len(np_array),
+    }
 
-def optimized_scalable_bottomk_elements_getter(np_array, partition_count, bottom_k):
-    np_array_sorted = scalable_sort(np_array)
-    np_array_sorted = get_bottom_k_elements(np_array_sorted)
-    return {"bottom_k_elements":np_array_sorted,"bottom_k":len(np_array_sorted)}
 
-    
+def optimized_scalable_topk_elements_getter(
+    np_array,
+    partition_count,
+    top_k,
+):
+    np_array_sorted = scalable_sort(
+        np_array,
+        partition_count,
+    )
 
-    
+    top_k_elements = get_top_k_elements(
+        np_array_sorted,
+        top_k,
+    )
 
-if __name__=="__main__":
-    N = int(pow(10,6))
+    return {
+        "top_k_elements": top_k_elements,
+        "top_k": len(top_k_elements),
+    }
+
+
+def optimized_scalable_bottomk_elements_getter(
+    np_array,
+    partition_count,
+    bottom_k,
+):
+    np_array_sorted = scalable_sort(
+        np_array,
+        partition_count,
+    )
+
+    bottom_k_elements = get_bottom_k_elements(
+        np_array_sorted,
+        bottom_k,
+    )
+
+    return {
+        "bottom_k_elements": bottom_k_elements,
+        "bottom_k": len(bottom_k_elements),
+    }
+
+
+if __name__ == "__main__":
+
     partition_count = 4
-    arr = [i for i in range(N)]
-    arr = [-1*i for i in range(N)]
+    N = pow(10,8)
+    arr = [i for i in range(N)] + [0] + [-1*i for i in range(N)]
+
     np_array = np.array(arr)
-    array_data_dict = optimized_scalable_sort(np_array, partition_count)
-    from pprint import pprint
-    pprint(array_data_dict)
 
-    top_k = 100
-    array_data_dict = optimized_scalable_topk_elements_getter(np_array, partition_count, top_k)
-    pprint(array_data_dict)
+    print(
+        optimized_scalable_sort(
+            np_array,
+            partition_count,
+        )
+    )
 
-    bottom_k = 100
-    array_data_dict = optimized_scalable_bottomk_elements_getter(np_array, partition_count, bottom_k)
-    pprint(array_data_dict)
+    top_k = 10
+
+    print(
+        optimized_scalable_topk_elements_getter(
+            np_array,
+            partition_count,
+            top_k,
+        )
+    )
+
+    bottom_k = 10
+
+    print(
+        optimized_scalable_bottomk_elements_getter(
+            np_array,
+            partition_count,
+            bottom_k,
+        )
+    )
