@@ -222,7 +222,7 @@ if __name__ == "__main__":
         )
     )
 
-    top_k = 10
+    top_k = pow(10,8)
 
     print(
         optimized_scalable_topk_elements_getter(
@@ -232,7 +232,7 @@ if __name__ == "__main__":
         )
     )
 
-    bottom_k = 10
+    bottom_k = pow(10,6)
 
     print(
         optimized_scalable_bottomk_elements_getter(
