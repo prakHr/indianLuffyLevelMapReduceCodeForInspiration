@@ -203,8 +203,16 @@ if __name__ == "__main__":
 
     partition_count = 4
     N = pow(10,8)
+    include_only_unique = False
     arr = [i for i in range(N)] + [0] + [-1*i for i in range(N)]
-
+    if include_only_unique==True:
+        st = set()
+        arr2 = []
+        for ele in arr:
+            if ele not in st:
+                arr2.append(ele)
+                st.add(ele)
+        arr = arr2
     np_array = np.array(arr)
 
     print(
